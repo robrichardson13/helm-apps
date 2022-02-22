@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kernel
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: kernel
+  source:
+    repoURL: https://github.com/robrichardson13/helm-apps.git
+    targetRevision: HEAD
+    path: kernel
+    helm:
+      values: |
+        {{- toYaml .Values | nindent 8 }} 
+         
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kernel

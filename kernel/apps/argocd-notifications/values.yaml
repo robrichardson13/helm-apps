@@ -1,0 +1,23 @@
+argocd-notifications:
+  templates:
+    service.webhook.ff-lambda: |
+      url: https://gzewfgicyk.execute-api.us-west-2.amazonaws.com
+      headers:
+        - name: Content-Type
+          value: application/json
+    template.deployed-webhook: |
+      webhook:
+        ff-lambda:
+          method: POST
+          path: /prod/argo-test/deployed
+          body: |
+            {
+              "tag": {{ (call .repo.GetAppDetails).Helm.GetParameterValueByName "portal.tag" }},
+              "host": {{ (call .repo.GetAppDetails).Helm.GetParameterValueByName "host" }},
+              "project": {{ (call .repo.GetAppDetails).Helm.GetParameterValueByName "portal.project" }},
+            }
+  triggers:
+    trigger.on-sync-running-lambda: |
+      - when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy'
+        oncePer: app.status.operationState.operation.sync.revision
+        send: [deployed-webhook]
