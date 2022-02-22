@@ -1,0 +1,6 @@
+clusterName: ""
+sslCert: ""
+lb:
+  dns: ""
+  hostedZoneId: ""
+  zoneId: ""
